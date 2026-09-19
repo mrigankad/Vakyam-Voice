@@ -1,0 +1,145 @@
+@import "./styles/tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist/Geist-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Michroma";
+  src: url("/fonts/Michroma/Michroma-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root,
+  .dark {
+    --brand-red: 15 87% 45%;
+    --brand-teal: 26 99% 48%;
+    --brand-dark: 0 0% 0%;
+    --brand-navy: 0 0% 10%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 54%;
+    --accent: 26 99% 48%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 100% / 0.14;
+    --input: 0 0% 100% / 0.14;
+    --ring: 26 99% 48%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 83%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 100% / 0.08;
+    --sidebar-ring: 26 99% 48%;
+    --hero-gradient: linear-gradient(180deg, #191919 0%, #000 100%);
+  }
+
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-scroll-bar) transparent;
+  }
+
+  html,
+  body,
+  #root { min-height: 100%; }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background: var(--surface-page-background);
+    color: var(--text-primary);
+    font-family: Geist, Arial, Helvetica, sans-serif;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: Michroma, Geist, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .text-display-page {
+    font-size: clamp(1.75rem, 4vw, var(--display-3xl-size));
+    line-height: var(--display-3xl-line);
+  }
+
+  .text-display-sm {
+    font-size: var(--display-lg-size);
+    line-height: var(--display-lg-line);
+  }
+
+  .ink-tertiary { color: var(--text-tertiary); }
+  .ink-quaternary { color: var(--text-quaternary); }
+  .hero-gradient { background: var(--hero-gradient); }
+
+  .card-elevated {
+    background: var(--surface-container);
+    border: 1px solid var(--stroke-muted);
+    border-radius: 16px;
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .card-elevated:hover {
+    border-color: var(--stroke-default);
+    transform: translateY(-1px);
+  }
+
+  .voice-orb {
+    @apply flex items-center justify-center rounded-full transition duration-200;
+    background: radial-gradient(circle at 35% 30%, #facc15 0%, #f97316 38%, #431407 67%, #160d08 100%);
+    border: 1px solid rgb(245 105 1 / 0.42);
+    box-shadow: 0 0 36px rgb(249 115 22 / 0.24);
+  }
+
+  .voice-orb:hover { transform: scale(1.035); }
+  .voice-orb.listening { animation: pulse-ring 1.5s ease-out infinite; }
+  .voice-orb.speaking { animation: speaking-glow 0.8s ease-in-out infinite alternate; }
+
+  .phone-circle {
+    @apply flex h-16 w-16 items-center justify-center rounded-full;
+    background: linear-gradient(145deg, #2a2a2a, #101010);
+    border: 1px solid var(--stroke-default);
+  }
+
+  .auth-flow-mesh {
+    background:
+      radial-gradient(circle at 75% 25%, rgb(255 161 43 / 0.4), transparent 34%),
+      radial-gradient(circle at 18% 75%, rgb(220 68 12 / 0.32), transparent 38%),
+      linear-gradient(135deg, #080302 0%, #2a0c04 58%, #7d260b 100%);
+  }
+
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgb(245 105 1 / 0.5), 0 0 36px rgb(249 115 22 / 0.24); }
+    70% { box-shadow: 0 0 0 20px rgb(245 105 1 / 0), 0 0 44px rgb(249 115 22 / 0.3); }
+    100% { box-shadow: 0 0 0 0 rgb(245 105 1 / 0), 0 0 36px rgb(249 115 22 / 0.24); }
+  }
+
+  @keyframes speaking-glow {
+    from { box-shadow: 0 0 24px rgb(250 141 35 / 0.35); }
+    to { box-shadow: 0 0 52px rgb(255 161 43 / 0.65); }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "firstMessage": "Namaste! I'm Meera from Club Mahindra Member Care. You can speak with me in Hindi or English. How can I help today?",
+  "voice": {
+    "provider": "vapi",
+    "voiceId": "Naina",
+    "version": 2,
+    "language": "auto",
+    "speed": 1.2
+  },
+  "startSpeakingPlan": {
+    "waitSeconds": 0.4
+  },
+  "stopSpeakingPlan": {
+    "numWords": 2,
+    "voiceSeconds": 0.25,
+    "backoffSeconds": 0.8,
+    "acknowledgementPhrases": [
+      "okay",
+      "right",
+      "I see",
+      "got it",
+      "haan",
+      "hmm",
+      "ji",
+      "theek hai",
+      "samajh gayi"
+    ]
+  },
+  "promptAppend": "NATURAL DELIVERY: Respond like a thoughtful person in a live conversation, not a call-centre script. Use contractions in English. In Hindi, prefer everyday spoken phrasing; mirror natural Hinglish when the member uses Hinglish. Begin with at most one brief acknowledgement when it adds value, vary it, and never repeat it mechanically. Avoid restating the member's full question. Use punctuation to create gentle spoken pauses. Vary sentence openings and closings. A short sentence is often enough. Never add filler merely to sound human."
+}
