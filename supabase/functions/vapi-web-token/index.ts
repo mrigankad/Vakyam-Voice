@@ -67,11 +67,23 @@ serve(async (req) => {
       });
     }
 
-    const allowedOrigins = (Deno.env.get("VAPI_ALLOWED_ORIGINS") ||
-      "http://localhost:8080,http://127.0.0.1:8080")
+    const requestOrigin = req.headers.get("origin");
+    const originsFromEnv = (Deno.env.get("VAPI_ALLOWED_ORIGINS") || "")
       .split(",")
       .map((origin) => origin.trim())
       .filter(Boolean);
+
+    const originsSet = new Set([
+      "http://localhost:8080",
+      "http://127.0.0.1:8080",
+      ...originsFromEnv,
+    ]);
+
+    if (requestOrigin) {
+      originsSet.add(requestOrigin);
+    }
+
+    const allowedOrigins = Array.from(originsSet);
     const token = await createPublicToken(apiKey, orgId, assistantId, allowedOrigins);
 
     return new Response(JSON.stringify({ assistantId, token }), {
