@@ -67,23 +67,15 @@ serve(async (req) => {
       });
     }
 
-    const requestOrigin = req.headers.get("origin");
-    const originsFromEnv = (Deno.env.get("VAPI_ALLOWED_ORIGINS") || "")
+    // Only origins listed in the VAPI_ALLOWED_ORIGINS secret may use the
+    // minted token. Never trust the request's Origin header here: doing so
+    // would let any site mint a token valid for itself. Production domains
+    // (e.g. https://vakyam-voice.wayam.ai) must be added to the secret.
+    const allowedOrigins = (Deno.env.get("VAPI_ALLOWED_ORIGINS") ||
+      "http://localhost:8080,http://127.0.0.1:8080")
       .split(",")
       .map((origin) => origin.trim())
       .filter(Boolean);
-
-    const originsSet = new Set([
-      "http://localhost:8080",
-      "http://127.0.0.1:8080",
-      ...originsFromEnv,
-    ]);
-
-    if (requestOrigin) {
-      originsSet.add(requestOrigin);
-    }
-
-    const allowedOrigins = Array.from(originsSet);
     const token = await createPublicToken(apiKey, orgId, assistantId, allowedOrigins);
 
     return new Response(JSON.stringify({ assistantId, token }), {
