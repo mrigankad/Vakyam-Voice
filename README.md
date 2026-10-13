@@ -15,6 +15,10 @@ The Azure API key and the prompt never reach the browser. Calls are cut off afte
 
 Meera's prompt and opening line live in `supabase/functions/realtime-token/prompt.ts`. Edit the file and redeploy the function. The voice is the `AZURE_REALTIME_VOICE` secret.
 
+## Demo data
+
+`supabase/functions/realtime-token/inventory.ts` gives Meera a **mock** member account and resort availability so she can discuss real dates, remaining nights and holds. None of it comes from a Club Mahindra system, and holds are not recorded anywhere. Availability is generated per calendar week, so the same date gives the same answer on every call. Replace `buildDemoContext` with real inventory and member lookups before using the agent with actual members.
+
 ## Client accounts
 
 There is no signup page. Create client accounts in the Supabase dashboard under Authentication > Users, and turn off "Allow new users to sign up" so accounts cannot be created through the API.
