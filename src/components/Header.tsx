@@ -1,4 +1,4 @@
-import { Settings, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -18,26 +18,17 @@ export const Header = () => {
           </div>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <Link
-            to="/admin/analytics"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        {user && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={signOut}
+            className="text-muted-foreground hover:text-foreground"
           >
-            <Settings className="w-5 h-5" />
-            <span className="hidden sm:inline">Admin</span>
-          </Link>
-          {user && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={signOut}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          )}
-        </div>
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Logout</span>
+          </Button>
+        )}
       </div>
     </header>
   );

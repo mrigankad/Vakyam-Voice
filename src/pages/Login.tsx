@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,16 +99,10 @@ const Login = () => {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex flex-col gap-4">
+            <CardFooter>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>
-              <p className="text-center text-sm text-white/60">
-                Don&apos;t have an account?{" "}
-                <Link to="/signup" className="text-white underline-offset-4 hover:underline">
-                  Sign up
-                </Link>
-              </p>
             </CardFooter>
           </form>
         </Card>

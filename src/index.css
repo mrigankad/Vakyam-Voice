@@ -23,10 +23,6 @@
 @layer base {
   :root,
   .dark {
-    --brand-red: 15 87% 45%;
-    --brand-teal: 26 99% 48%;
-    --brand-dark: 0 0% 0%;
-    --brand-navy: 0 0% 10%;
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --card: 0 0% 6%;
@@ -47,14 +43,6 @@
     --input: 0 0% 100% / 0.14;
     --ring: 26 99% 48%;
     --radius: 0.75rem;
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 0 0% 83%;
-    --sidebar-primary: 0 0% 98%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 100% / 0.08;
-    --sidebar-ring: 26 99% 48%;
     --hero-gradient: linear-gradient(180deg, #191919 0%, #000 100%);
   }
 
@@ -92,8 +80,6 @@
     line-height: var(--display-lg-line);
   }
 
-  .ink-tertiary { color: var(--text-tertiary); }
-  .ink-quaternary { color: var(--text-quaternary); }
   .hero-gradient { background: var(--hero-gradient); }
 
   .card-elevated {
@@ -118,12 +104,6 @@
   .voice-orb:hover { transform: scale(1.035); }
   .voice-orb.listening { animation: pulse-ring 1.5s ease-out infinite; }
   .voice-orb.speaking { animation: speaking-glow 0.8s ease-in-out infinite alternate; }
-
-  .phone-circle {
-    @apply flex h-16 w-16 items-center justify-center rounded-full;
-    background: linear-gradient(145deg, #2a2a2a, #101010);
-    border: 1px solid var(--stroke-default);
-  }
 
   .auth-flow-mesh {
     background:

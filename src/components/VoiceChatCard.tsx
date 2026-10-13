@@ -1,16 +1,10 @@
 import { Languages, Loader2, Mic, MicOff } from "lucide-react";
-import { useVapi } from "@/hooks/useVapi";
+import { useVoiceAgent } from "@/hooks/useVoiceAgent";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 
-const LANGUAGE_LABEL: Record<string, string> = {
-  en: "English",
-  hi: "Hindi",
-  multi: "Hindi / English",
-};
-
 export const VoiceChatCard = () => {
-  const { status, isSpeaking, error, detectedLanguage, startCall, endCall } = useVapi();
+  const { status, isSpeaking, error, startCall, endCall } = useVoiceAgent();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,9 +27,6 @@ export const VoiceChatCard = () => {
     idle: "Click to start speaking",
   }[status];
   const isActive = status !== "idle" && status !== "error";
-  const detectedLabel = detectedLanguage
-    ? LANGUAGE_LABEL[detectedLanguage] || detectedLanguage.toUpperCase()
-    : null;
 
   return (
     <div className="card-elevated flex flex-col items-center p-6 text-center">
@@ -54,8 +45,7 @@ export const VoiceChatCard = () => {
 
       <button
         onClick={handleMicClick}
-        disabled={status === "connecting"}
-        className={`voice-orb mb-5 h-24 w-24 ${isActive ? "listening" : ""} ${isSpeaking ? "speaking" : ""} disabled:cursor-not-allowed disabled:opacity-50`}
+        className={`voice-orb mb-5 h-24 w-24 ${isActive ? "listening" : ""} ${isSpeaking ? "speaking" : ""}`}
         aria-label={isActive ? "End voice chat" : "Start voice chat"}
       >
         {status === "connecting" ? (
@@ -69,12 +59,6 @@ export const VoiceChatCard = () => {
 
       <p className="text-sm font-medium text-foreground">Club Mahindra Member Care</p>
       <p className="text-xs text-muted-foreground">{stateText}</p>
-      {isActive && detectedLabel && (
-        <p className="mt-1 text-xs text-muted-foreground">
-          Detected: <span className="font-medium text-foreground">{detectedLabel}</span>
-        </p>
-      )}
     </div>
   );
 };
-

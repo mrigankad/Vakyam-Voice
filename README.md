@@ -1,73 +1,53 @@
-# Welcome to your Lovable project
+# Vakyam Voice
 
-## Project info
+Vakyam Voice Agents by Wayam: a single page where a signed-in client talks to a voice agent in the browser. The current agent is "Meera", a bilingual (Hindi/English) Club Mahindra member concierge, running on an Azure OpenAI realtime (speech-to-speech) model.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## How it works
 
-## How can I edit this code?
+1. The client signs in at `/login` (Supabase email/password).
+2. On `/`, pressing the mic button calls the `realtime-token` Edge Function.
+3. The function checks the caller is a signed-in user, then asks Azure for a short-lived session token with Meera's prompt and voice already bound to it.
+4. The browser connects straight to Azure over WebRTC with that token and streams audio both ways.
 
-There are several ways of editing your application.
+The Azure API key and the prompt never reach the browser. Calls are cut off after 10 minutes.
 
-**Use Lovable**
+## Changing the agent
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Meera's prompt and opening line live in `supabase/functions/realtime-token/prompt.ts`. Edit the file and redeploy the function. The voice is the `AZURE_REALTIME_VOICE` secret.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Client accounts
 
-**Use your preferred IDE**
+There is no signup page. Create client accounts in the Supabase dashboard under Authentication > Users, and turn off "Allow new users to sign up" so accounts cannot be created through the API.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Local development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requires Node.js 20+ and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
+npm run dev      # http://localhost:8080
 ```
 
-**Edit a file directly in GitHub**
+Other scripts: `npm run build`, `npm run preview`, `npm run lint`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Configuration
 
-**Use GitHub Codespaces**
+Front-end variables live in `.env` (see `.env.example`). These are publishable values:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_SUPABASE_PROJECT_ID`
 
-## What technologies are used for this project?
+Edge Function secrets are set with `supabase secrets set`, never in `.env`:
 
-This project is built with:
+- `AZURE_OPENAI_RESOURCE`: Azure AI resource name (the part before `.openai.azure.com`)
+- `AZURE_OPENAI_API_KEY`: that resource's API key
+- `AZURE_REALTIME_DEPLOYMENT`: name of the realtime model deployment
+- `AZURE_REALTIME_VOICE`: optional; defaults to `marin`
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Deployment
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **Azure Static Web Apps**: every push to `main` builds and deploys through `.github/workflows/azure-static-web-app.yml`, using the `AZURE_STATIC_WEB_APPS_API_TOKEN` repository secret. `public/staticwebapp.config.json` rewrites all paths to `index.html`.
+- **Vercel**: builds with `npm run build`; `vercel.json` rewrites all paths to `index.html`.
+- **Docker**: run `npm run build`, then `docker build -t vakyam-voice .` to serve `dist/` with nginx on port 80.
+- **Edge Function**: `npx supabase functions deploy realtime-token`.
