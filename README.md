@@ -7,7 +7,8 @@ Vakyam Voice Agents by Wayam: a single page where a signed-in client talks to a 
 1. The client signs in at `/login` (Supabase email/password).
 2. On `/`, pressing the mic button calls the `realtime-token` Edge Function.
 3. The function checks the caller is a signed-in user, then asks Azure for a short-lived session token with Meera's prompt and voice already bound to it.
-4. The browser connects straight to Azure over WebRTC with that token and streams audio both ways.
+4. The browser connects straight to Azure over WebRTC with that token and streams the member's audio to the model.
+5. With Azure Speech configured, the model replies in text and the browser speaks each sentence with a native Indian voice (`src/lib/speechOutput.ts`) as it arrives. Without it, the model speaks with its own voice.
 
 The Azure API key and the prompt never reach the browser. Calls are cut off after 10 minutes.
 
@@ -48,6 +49,16 @@ Edge Function secrets are set with `supabase secrets set`, never in `.env`:
 - `AZURE_OPENAI_API_KEY`: that resource's API key
 - `AZURE_REALTIME_DEPLOYMENT`: name of the realtime model deployment
 - `AZURE_REALTIME_VOICE`: optional; defaults to `marin`
+- `AZURE_SPEECH_KEY` and `AZURE_SPEECH_REGION`: optional Azure Speech resource (currently `wayam-speech-centralindia`). When both are set, the realtime model replies in text and the browser speaks it with a native Indian Azure voice, so `AZURE_REALTIME_VOICE` is ignored.
+- `AZURE_SPEECH_VOICE`: optional; defaults to `en-IN-AartiIndicNeural`, which speaks both Indian English and Hindi
+
+### Testing the function locally
+
+Put the secrets above, plus `SUPABASE_URL` and `SUPABASE_ANON_KEY`, in `supabase/.env.local`, and add `VITE_REALTIME_TOKEN_URL=http://localhost:8000` to `.env.local`. Both files are gitignored. Then run the function next to `npm run dev`:
+
+```sh
+npx deno run --no-lock --allow-net --allow-env --allow-read --env-file=supabase/.env.local supabase/functions/realtime-token/index.ts
+```
 
 ## Deployment
 

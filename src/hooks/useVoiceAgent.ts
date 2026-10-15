@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { SpeechOutput } from "@/lib/speechOutput";
 
 export type VoiceStatus = "idle" | "connecting" | "connected" | "speaking" | "listening" | "error";
 
@@ -19,7 +20,26 @@ interface Call {
   microphone: MediaStream;
   audio: HTMLAudioElement;
   timeout: number;
+  /** Set when Meera speaks with a native Indian Azure voice. */
+  speech?: SpeechOutput;
+  context: AudioContext;
 }
+
+/**
+ * Asks for a voice session. VITE_REALTIME_TOKEN_URL points at a locally served
+ * copy of the realtime-token function, for trying changes before deploying it.
+ */
+const requestSession = async () => {
+  const localUrl = import.meta.env.VITE_REALTIME_TOKEN_URL as string | undefined;
+  if (!localUrl) return supabase.functions.invoke("realtime-token");
+  const { data: auth } = await supabase.auth.getSession();
+  const response = await fetch(localUrl, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${auth.session?.access_token ?? ""}` },
+  });
+  const data = await response.json();
+  return { data, error: response.ok ? null : new Error(data?.error || `HTTP ${response.status}`) };
+};
 
 const getErrorMessage = (value: unknown): string => {
   if (value instanceof DOMException && value.name === "NotAllowedError") {
@@ -53,6 +73,8 @@ export const useVoiceAgent = (): UseVoiceAgentReturn => {
     call.microphone.getTracks().forEach((track) => track.stop());
     call.peer.close();
     call.audio.srcObject = null;
+    call.speech?.close();
+    void call.context.close();
   }, []);
 
   useEffect(() => teardown, [teardown]);
@@ -71,11 +93,16 @@ export const useVoiceAgent = (): UseVoiceAgentReturn => {
 
     let microphone: MediaStream | null = null;
     let peer: RTCPeerConnection | null = null;
+    // Created during the click, so the browser lets it play sound later.
+    const context = new AudioContext({ sampleRate: 24000 });
+    let speech: SpeechOutput | undefined;
 
     const fail = (cause: unknown) => {
       console.error("Voice call failed:", cause);
       microphone?.getTracks().forEach((track) => track.stop());
       peer?.close();
+      speech?.close();
+      void context.close();
       if (attempt !== attemptRef.current) return;
       teardown();
       setError(getErrorMessage(cause));
@@ -90,7 +117,7 @@ export const useVoiceAgent = (): UseVoiceAgentReturn => {
         navigator.mediaDevices.getUserMedia({
           audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         }),
-        supabase.functions.invoke("realtime-token"),
+        requestSession(),
       ]);
       microphone = stream;
 
@@ -98,8 +125,18 @@ export const useVoiceAgent = (): UseVoiceAgentReturn => {
       if (tokenError || !data?.token || !data?.callUrl) {
         throw new Error(data?.error || tokenError?.message || "Failed to get a voice session");
       }
+      if (data.speech) {
+        const { SpeechOutput } = await import("@/lib/speechOutput");
+        speech = new SpeechOutput(data.speech, context, (speaking) => {
+          if (attempt !== attemptRef.current) return;
+          setIsSpeaking(speaking);
+          setStatus(speaking ? "speaking" : "listening");
+        });
+      }
       if (attempt !== attemptRef.current) {
         stream.getTracks().forEach((track) => track.stop());
+        speech?.close();
+        void context.close();
         return;
       }
 
@@ -114,6 +151,8 @@ export const useVoiceAgent = (): UseVoiceAgentReturn => {
         microphone: stream,
         audio,
         timeout: window.setTimeout(endCall, MAX_CALL_MS),
+        speech,
+        context,
       };
       connection.ontrack = (event) => {
         audio.srcObject = event.streams[0];
@@ -134,7 +173,14 @@ export const useVoiceAgent = (): UseVoiceAgentReturn => {
       });
       events.addEventListener("message", (message) => {
         if (attempt !== attemptRef.current) return;
-        const { type } = JSON.parse(message.data) as { type?: string };
+        const { type, delta } = JSON.parse(message.data) as { type?: string; delta?: string };
+        if (speech) {
+          // The model replies in text; the Indian voice speaks it.
+          if (type === "response.output_text.delta" && delta) speech.addText(delta);
+          else if (type === "response.output_text.done") speech.finish();
+          else if (type === "input_audio_buffer.speech_started") speech.interrupt();
+          return;
+        }
         if (type === "output_audio_buffer.started") {
           setIsSpeaking(true);
           setStatus("speaking");
